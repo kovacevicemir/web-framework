@@ -2074,7 +2074,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.User = void 0;
 
-var axios_1 = __importDefault(require("axios"));
+var axios_1 = __importDefault(require("axios")); //base url
+
+
+var baseUrl = "http://localhost:3000";
 
 var User =
 /** @class */
@@ -2123,7 +2126,7 @@ function () {
 
             return [4
             /*yield*/
-            , axios_1.default.get("http://localhost:3000/users/" + this.get("id"))];
+            , axios_1.default.get(baseUrl + "/users/" + this.get("id"))];
 
           case 1:
             res = _a.sent();
@@ -2148,6 +2151,29 @@ function () {
     });
   };
 
+  User.prototype.save = function () {
+    return __awaiter(this, void 0, Promise, function () {
+      var id;
+      return __generator(this, function (_a) {
+        try {
+          id = this.get("id");
+
+          if (id) {
+            axios_1.default.put(baseUrl + "/users/" + id, this.data);
+          } else {
+            axios_1.default.post(baseUrl + "/users", this.data);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+
+        return [2
+        /*return*/
+        ];
+      });
+    });
+  };
+
   return User;
 }();
 
@@ -2163,12 +2189,11 @@ var User_1 = require("./models/User");
 
 var baseUrl = "http://localhost:3000";
 var user = new User_1.User({
-  id: 1
+  name: "new record",
+  age: 0
 });
-user.fetch();
-setTimeout(function () {
-  console.log(user);
-}, 4000);
+user.save();
+console.log(user);
 },{"./models/User":"src/models/User.ts"}],"C:/Users/Emir/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';

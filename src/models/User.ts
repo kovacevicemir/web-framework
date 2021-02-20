@@ -9,11 +9,14 @@ interface IUserProps {
 // Alias of function
 type Callback = () => void;
 
+//base url
+const baseUrl = "http://localhost:3000"
+
 export class User {
+  constructor(private data: IUserProps) {}
+
   //any key in events will have type of string.
   events: { [key: string]: Callback[] } = {};
-
-  constructor(private data: IUserProps) {}
 
   get(propName: string): string | number {
     return this.data[propName];
@@ -45,9 +48,22 @@ export class User {
   async fetch(): Promise<void> {
     try {
       const res: AxiosResponse = await axios.get(
-        `http://localhost:3000/users/${this.get("id")}`
+        `${baseUrl}/users/${this.get("id")}`
       );
       this.set(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async save(): Promise<void> {
+    try {
+      const id = this.get("id");
+      if (id) {
+        axios.put(`${baseUrl}/users/${id}`,this.data);
+      } else {
+        axios.post(`${baseUrl}/users`,this.data);
+      }
     } catch (error) {
       console.log(error);
     }
