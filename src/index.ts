@@ -1,17 +1,12 @@
 import {User} from './models/User';
+import axios from 'axios'
 
-const user = new User({name:"emir",age:20});
+const baseUrl = "http://localhost:3000"
 
-user.on("change",()=>{
-    console.log('Change #1')
-})
-user.on("change",()=>{
-    console.log('Change #2')
-})
-user.on("custom",()=>{
-    console.log('Change custom')
-})
+const user = new User({id:1});
 
-user.trigger('change');
-user.trigger('custom');
-user.trigger('customfdsafsa');
+user.fetch();
+
+setTimeout(() => {
+    console.log(user);
+}, 4000);

@@ -1,4 +1,7 @@
+import axios, { AxiosResponse } from "axios";
+
 interface IUserProps {
+  id?: number;
   name?: string;
   age?: number;
 }
@@ -8,34 +11,45 @@ type Callback = () => void;
 
 export class User {
   //any key in events will have type of string.
-  events:{ [key:string]:Callback[] } = {}
+  events: { [key: string]: Callback[] } = {};
 
   constructor(private data: IUserProps) {}
 
-  get(propName:string):(string|number){
+  get(propName: string): string | number {
     return this.data[propName];
   }
 
-  set(update:IUserProps):void{
+  set(update: IUserProps): void {
     Object.assign(this.data, update);
   }
 
-  on(eventName: string, callback:Callback):void{
+  on(eventName: string, callback: Callback): void {
     // assign event to handlers or empty [] if events undefined.
     const handlers = this.events[eventName] || [];
     handlers.push(callback);
     this.events[eventName] = handlers;
   }
 
-  trigger(eventName:string):void{
+  trigger(eventName: string): void {
     //check if handler/s exist
     const handlers = this.events[eventName];
-    if( !handlers || handlers.length === 0 ){
+    if (!handlers || handlers.length === 0) {
       return;
     }
 
-    handlers.forEach(callback=>{
-        callback();
-    })
+    handlers.forEach((callback) => {
+      callback();
+    });
+  }
+
+  async fetch(): Promise<void> {
+    try {
+      const res: AxiosResponse = await axios.get(
+        `http://localhost:3000/users/${this.get("id")}`
+      );
+      this.set(res.data);
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
