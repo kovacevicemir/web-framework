@@ -1,4 +1,8 @@
 import axios, { AxiosResponse } from "axios";
+import { Eventing } from "./Eventing";
+
+//base url
+const baseUrl = "http://localhost:3000";
 
 interface IUserProps {
   id?: number;
@@ -6,17 +10,11 @@ interface IUserProps {
   age?: number;
 }
 
-// Alias of function
-type Callback = () => void;
-
-//base url
-const baseUrl = "http://localhost:3000"
-
 export class User {
-  constructor(private data: IUserProps) {}
-
-  //any key in events will have type of string.
-  events: { [key: string]: Callback[] } = {};
+  constructor(
+    private data: IUserProps,
+    public events: Eventing = new Eventing()
+  ) {}
 
   get(propName: string): string | number {
     return this.data[propName];
@@ -24,25 +22,6 @@ export class User {
 
   set(update: IUserProps): void {
     Object.assign(this.data, update);
-  }
-
-  on(eventName: string, callback: Callback): void {
-    // assign event to handlers or empty [] if events undefined.
-    const handlers = this.events[eventName] || [];
-    handlers.push(callback);
-    this.events[eventName] = handlers;
-  }
-
-  trigger(eventName: string): void {
-    //check if handler/s exist
-    const handlers = this.events[eventName];
-    if (!handlers || handlers.length === 0) {
-      return;
-    }
-
-    handlers.forEach((callback) => {
-      callback();
-    });
   }
 
   async fetch(): Promise<void> {
@@ -60,9 +39,9 @@ export class User {
     try {
       const id = this.get("id");
       if (id) {
-        axios.put(`${baseUrl}/users/${id}`,this.data);
+        axios.put(`${baseUrl}/users/${id}`, this.data);
       } else {
-        axios.post(`${baseUrl}/users`,this.data);
+        axios.post(`${baseUrl}/users`, this.data);
       }
     } catch (error) {
       console.log(error);
