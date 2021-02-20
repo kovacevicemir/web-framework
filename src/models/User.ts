@@ -26,4 +26,16 @@ export class User {
     handlers.push(callback);
     this.events[eventName] = handlers;
   }
+
+  trigger(eventName:string):void{
+    //check if handler/s exist
+    const handlers = this.events[eventName];
+    if( !handlers || handlers.length === 0 ){
+      return;
+    }
+
+    handlers.forEach(callback=>{
+        callback();
+    })
+  }
 }
