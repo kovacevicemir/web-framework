@@ -4,7 +4,7 @@ import axios, { AxiosPromise, AxiosResponse } from "axios";
 // const baseUrl = "http://localhost:3000";
 
 interface HasId{
-  id:number;
+  id?:number;
 }
 
 export class Sync<T extends HasId> {
@@ -15,19 +15,19 @@ export class Sync<T extends HasId> {
       const res: AxiosResponse = await axios.get(`${this.rootUrl}/${id}`);
       return res.data;
     } catch (error) {
-      console.log(error);
+      throw(error)
     }
   }
 
   async save(data: T): Promise<AxiosPromise> {
     try {
-      if (data.id) {
+      if (data.id !== undefined) {
         return axios.put(`${this.rootUrl}/${data.id}`, data);
       } else {
         return axios.post(`${this.rootUrl}/users`, data);
       }
     } catch (error) {
-      console.log(error);
+      throw new Error('Unknown message type:')
     }
   }
 }

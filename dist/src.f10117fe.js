@@ -2143,10 +2143,7 @@ function () {
 
           case 2:
             error_1 = _a.sent();
-            console.log(error_1);
-            return [3
-            /*break*/
-            , 3];
+            throw error_1;
 
           case 3:
             return [2
@@ -2161,7 +2158,7 @@ function () {
     return __awaiter(this, void 0, Promise, function () {
       return __generator(this, function (_a) {
         try {
-          if (data.id) {
+          if (data.id !== undefined) {
             return [2
             /*return*/
             , axios_1.default.put(this.rootUrl + "/" + data.id, data)];
@@ -2171,7 +2168,7 @@ function () {
             , axios_1.default.post(this.rootUrl + "/users", data)];
           }
         } catch (error) {
-          console.log(error);
+          throw new Error('Unknown message type:');
         }
 
         return [2
@@ -2197,6 +2194,8 @@ var Eventing_1 = require("./Eventing");
 
 var Sync_1 = require("./Sync");
 
+var rootUrl = "http://localhost:3000/users";
+
 var User =
 /** @class */
 function () {
@@ -2206,7 +2205,7 @@ function () {
     }
 
     if (sync === void 0) {
-      sync = new Sync_1.Sync("http://localhost:3000/users");
+      sync = new Sync_1.Sync(rootUrl);
     }
 
     this.data = data;
@@ -2415,10 +2414,10 @@ var testing = function testing() {
           user.set(newUser);
           console.log(user);
           user.sync.save(__assign(__assign({}, newUser), {
-            name: "Changed name"
+            name: "Emir"
           }));
           setTimeout(function () {
-            return __awaiter(void 0, void 0, void 0, function () {
+            return __awaiter(void 0, void 0, Promise, function () {
               var newNewUser;
               return __generator(this, function (_a) {
                 switch (_a.label) {

@@ -12,9 +12,8 @@ const testing = async () =>{
  user.set(newUser)
  console.log(user)
 
- user.sync.save({...newUser,name:"Changed name"})
-
- setTimeout(async () => {
+ user.sync.save({...newUser,name:"Emir"})
+ setTimeout(async ():Promise<any> => {
      const newNewUser = await user.sync.fetch(1)
      console.log(newNewUser)
  }, 3000);
