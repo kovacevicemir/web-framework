@@ -9,13 +9,15 @@ const user = new User({id:1});
 
 const testing = async () =>{
  const newUser = await user.sync.fetch(1)
- user.set(newUser)
+ user.attributes.set(newUser)
  console.log(user)
 
- user.sync.save({...newUser,name:"Emir"})
+ user.sync.save({...newUser,name:"Emir 4"})
+
  setTimeout(async ():Promise<any> => {
      const newNewUser = await user.sync.fetch(1)
-     console.log(newNewUser)
+     user.attributes.set(newNewUser);
+     console.log(user)
  }, 3000);
 }
 

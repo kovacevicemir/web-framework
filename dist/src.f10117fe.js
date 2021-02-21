@@ -117,7 +117,38 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"src/models/Eventing.ts":[function(require,module,exports) {
+})({"src/models/Attributes.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Attributes = void 0;
+
+var Attributes =
+/** @class */
+function () {
+  function Attributes(data) {
+    this.data = data;
+  } //get<K extends keyof T>(key: K)
+  //K can only be one of keys of T
+  //T[K] return that object key value
+
+
+  Attributes.prototype.get = function (key) {
+    return this.data[key];
+  };
+
+  Attributes.prototype.set = function (update) {
+    console.log(update);
+    Object.assign(this.data, update);
+  };
+
+  return Attributes;
+}();
+
+exports.Attributes = Attributes;
+},{}],"src/models/Eventing.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2190,6 +2221,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.User = void 0;
 
+var Attributes_1 = require("./Attributes");
+
 var Eventing_1 = require("./Eventing");
 
 var Sync_1 = require("./Sync");
@@ -2199,7 +2232,11 @@ var rootUrl = "http://localhost:3000/users";
 var User =
 /** @class */
 function () {
-  function User(data, events, sync) {
+  function User(attrs, attributes, events, sync) {
+    if (attributes === void 0) {
+      attributes = new Attributes_1.Attributes(attrs);
+    }
+
     if (events === void 0) {
       events = new Eventing_1.Eventing();
     }
@@ -2208,24 +2245,16 @@ function () {
       sync = new Sync_1.Sync(rootUrl);
     }
 
-    this.data = data;
+    this.attributes = attributes;
     this.events = events;
     this.sync = sync;
   }
-
-  User.prototype.get = function (propName) {
-    return this.data[propName];
-  };
-
-  User.prototype.set = function (update) {
-    Object.assign(this.data, update);
-  };
 
   return User;
 }();
 
 exports.User = User;
-},{"./Eventing":"src/models/Eventing.ts","./Sync":"src/models/Sync.ts"}],"src/index.ts":[function(require,module,exports) {
+},{"./Attributes":"src/models/Attributes.ts","./Eventing":"src/models/Eventing.ts","./Sync":"src/models/Sync.ts"}],"src/index.ts":[function(require,module,exports) {
 "use strict";
 
 var __assign = this && this.__assign || function () {
@@ -2411,10 +2440,10 @@ var testing = function testing() {
 
         case 1:
           newUser = _a.sent();
-          user.set(newUser);
+          user.attributes.set(newUser);
           console.log(user);
           user.sync.save(__assign(__assign({}, newUser), {
-            name: "Emir"
+            name: "Emir 4"
           }));
           setTimeout(function () {
             return __awaiter(void 0, void 0, Promise, function () {
@@ -2428,7 +2457,8 @@ var testing = function testing() {
 
                   case 1:
                     newNewUser = _a.sent();
-                    console.log(newNewUser);
+                    user.attributes.set(newNewUser);
+                    console.log(user);
                     return [2
                     /*return*/
                     ];
