@@ -117,7 +117,47 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"node_modules/axios/lib/helpers/bind.js":[function(require,module,exports) {
+})({"src/models/Eventing.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Eventing = void 0;
+
+var Eventing =
+/** @class */
+function () {
+  function Eventing() {
+    //any key in events will have type of string.
+    this.events = {};
+  }
+
+  Eventing.prototype.on = function (eventName, callback) {
+    // assign event to handlers or empty [] if events undefined.
+    var handlers = this.events[eventName] || [];
+    handlers.push(callback);
+    this.events[eventName] = handlers;
+  };
+
+  Eventing.prototype.trigger = function (eventName) {
+    //check if handler/s exist
+    var handlers = this.events[eventName];
+
+    if (!handlers || handlers.length === 0) {
+      return;
+    }
+
+    handlers.forEach(function (callback) {
+      callback();
+    });
+  };
+
+  return Eventing;
+}();
+
+exports.Eventing = Eventing;
+},{}],"node_modules/axios/lib/helpers/bind.js":[function(require,module,exports) {
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -1917,47 +1957,7 @@ module.exports.default = axios;
 
 },{"./utils":"node_modules/axios/lib/utils.js","./helpers/bind":"node_modules/axios/lib/helpers/bind.js","./core/Axios":"node_modules/axios/lib/core/Axios.js","./core/mergeConfig":"node_modules/axios/lib/core/mergeConfig.js","./defaults":"node_modules/axios/lib/defaults.js","./cancel/Cancel":"node_modules/axios/lib/cancel/Cancel.js","./cancel/CancelToken":"node_modules/axios/lib/cancel/CancelToken.js","./cancel/isCancel":"node_modules/axios/lib/cancel/isCancel.js","./helpers/spread":"node_modules/axios/lib/helpers/spread.js","./helpers/isAxiosError":"node_modules/axios/lib/helpers/isAxiosError.js"}],"node_modules/axios/index.js":[function(require,module,exports) {
 module.exports = require('./lib/axios');
-},{"./lib/axios":"node_modules/axios/lib/axios.js"}],"src/models/Eventing.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.Eventing = void 0;
-
-var Eventing =
-/** @class */
-function () {
-  function Eventing() {
-    //any key in events will have type of string.
-    this.events = {};
-  }
-
-  Eventing.prototype.on = function (eventName, callback) {
-    // assign event to handlers or empty [] if events undefined.
-    var handlers = this.events[eventName] || [];
-    handlers.push(callback);
-    this.events[eventName] = handlers;
-  };
-
-  Eventing.prototype.trigger = function (eventName) {
-    //check if handler/s exist
-    var handlers = this.events[eventName];
-
-    if (!handlers || handlers.length === 0) {
-      return;
-    }
-
-    handlers.forEach(function (callback) {
-      callback();
-    });
-  };
-
-  return Eventing;
-}();
-
-exports.Eventing = Eventing;
-},{}],"src/models/User.ts":[function(require,module,exports) {
+},{"./lib/axios":"node_modules/axios/lib/axios.js"}],"src/models/Sync.ts":[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -2112,36 +2112,18 @@ var __importDefault = this && this.__importDefault || function (mod) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.User = void 0;
+exports.Sync = void 0;
 
 var axios_1 = __importDefault(require("axios"));
 
-var Eventing_1 = require("./Eventing"); //base url
-
-
-var baseUrl = "http://localhost:3000";
-
-var User =
+var Sync =
 /** @class */
 function () {
-  function User(data, events) {
-    if (events === void 0) {
-      events = new Eventing_1.Eventing();
-    }
-
-    this.data = data;
-    this.events = events;
+  function Sync(rootUrl) {
+    this.rootUrl = rootUrl;
   }
 
-  User.prototype.get = function (propName) {
-    return this.data[propName];
-  };
-
-  User.prototype.set = function (update) {
-    Object.assign(this.data, update);
-  };
-
-  User.prototype.fetch = function () {
+  Sync.prototype.fetch = function (id) {
     return __awaiter(this, void 0, Promise, function () {
       var res, error_1;
       return __generator(this, function (_a) {
@@ -2151,14 +2133,13 @@ function () {
 
             return [4
             /*yield*/
-            , axios_1.default.get(baseUrl + "/users/" + this.get("id"))];
+            , axios_1.default.get(this.rootUrl + "/" + id)];
 
           case 1:
             res = _a.sent();
-            this.set(res.data);
-            return [3
-            /*break*/
-            , 3];
+            return [2
+            /*return*/
+            , res.data];
 
           case 2:
             error_1 = _a.sent();
@@ -2176,17 +2157,18 @@ function () {
     });
   };
 
-  User.prototype.save = function () {
+  Sync.prototype.save = function (data) {
     return __awaiter(this, void 0, Promise, function () {
-      var id;
       return __generator(this, function (_a) {
         try {
-          id = this.get("id");
-
-          if (id) {
-            axios_1.default.put(baseUrl + "/users/" + id, this.data);
+          if (data.id) {
+            return [2
+            /*return*/
+            , axios_1.default.put(this.rootUrl + "/" + data.id, data)];
           } else {
-            axios_1.default.post(baseUrl + "/users", this.data);
+            return [2
+            /*return*/
+            , axios_1.default.post(this.rootUrl + "/users", data)];
           }
         } catch (error) {
           console.log(error);
@@ -2199,12 +2181,212 @@ function () {
     });
   };
 
+  return Sync;
+}();
+
+exports.Sync = Sync;
+},{"axios":"node_modules/axios/index.js"}],"src/models/User.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.User = void 0;
+
+var Eventing_1 = require("./Eventing");
+
+var Sync_1 = require("./Sync");
+
+var User =
+/** @class */
+function () {
+  function User(data, events, sync) {
+    if (events === void 0) {
+      events = new Eventing_1.Eventing();
+    }
+
+    if (sync === void 0) {
+      sync = new Sync_1.Sync("http://localhost:3000/users");
+    }
+
+    this.data = data;
+    this.events = events;
+    this.sync = sync;
+  }
+
+  User.prototype.get = function (propName) {
+    return this.data[propName];
+  };
+
+  User.prototype.set = function (update) {
+    Object.assign(this.data, update);
+  };
+
   return User;
 }();
 
 exports.User = User;
-},{"axios":"node_modules/axios/index.js","./Eventing":"src/models/Eventing.ts"}],"src/index.ts":[function(require,module,exports) {
+},{"./Eventing":"src/models/Eventing.ts","./Sync":"src/models/Sync.ts"}],"src/index.ts":[function(require,module,exports) {
 "use strict";
+
+var __assign = this && this.__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+
+      for (var p in s) {
+        if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+      }
+    }
+
+    return t;
+  };
+
+  return __assign.apply(this, arguments);
+};
+
+var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function (resolve) {
+      resolve(value);
+    });
+  }
+
+  return new (P || (P = Promise))(function (resolve, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+
+    function step(result) {
+      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
+
+var __generator = this && this.__generator || function (thisArg, body) {
+  var _ = {
+    label: 0,
+    sent: function sent() {
+      if (t[0] & 1) throw t[1];
+      return t[1];
+    },
+    trys: [],
+    ops: []
+  },
+      f,
+      y,
+      t,
+      g;
+  return g = {
+    next: verb(0),
+    "throw": verb(1),
+    "return": verb(2)
+  }, typeof Symbol === "function" && (g[Symbol.iterator] = function () {
+    return this;
+  }), g;
+
+  function verb(n) {
+    return function (v) {
+      return step([n, v]);
+    };
+  }
+
+  function step(op) {
+    if (f) throw new TypeError("Generator is already executing.");
+
+    while (_) {
+      try {
+        if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+        if (y = 0, t) op = [op[0] & 2, t.value];
+
+        switch (op[0]) {
+          case 0:
+          case 1:
+            t = op;
+            break;
+
+          case 4:
+            _.label++;
+            return {
+              value: op[1],
+              done: false
+            };
+
+          case 5:
+            _.label++;
+            y = op[1];
+            op = [0];
+            continue;
+
+          case 7:
+            op = _.ops.pop();
+
+            _.trys.pop();
+
+            continue;
+
+          default:
+            if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+              _ = 0;
+              continue;
+            }
+
+            if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+              _.label = op[1];
+              break;
+            }
+
+            if (op[0] === 6 && _.label < t[1]) {
+              _.label = t[1];
+              t = op;
+              break;
+            }
+
+            if (t && _.label < t[2]) {
+              _.label = t[2];
+
+              _.ops.push(op);
+
+              break;
+            }
+
+            if (t[2]) _.ops.pop();
+
+            _.trys.pop();
+
+            continue;
+        }
+
+        op = body.call(thisArg, _);
+      } catch (e) {
+        op = [6, e];
+        y = 0;
+      } finally {
+        f = t = 0;
+      }
+    }
+
+    if (op[0] & 5) throw op[1];
+    return {
+      value: op[0] ? op[1] : void 0,
+      done: true
+    };
+  }
+};
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -2214,11 +2396,56 @@ var User_1 = require("./models/User");
 
 var baseUrl = "http://localhost:3000";
 var user = new User_1.User({
-  name: "new record",
-  age: 0
-});
-console.log(user);
-User_1.User.kurcina();
+  id: 1
+}); // user.events.on('test',()=>{console.log('kurac')});
+// user.events.trigger('test');
+
+var testing = function testing() {
+  return __awaiter(void 0, void 0, void 0, function () {
+    var newUser;
+    return __generator(this, function (_a) {
+      switch (_a.label) {
+        case 0:
+          return [4
+          /*yield*/
+          , user.sync.fetch(1)];
+
+        case 1:
+          newUser = _a.sent();
+          user.set(newUser);
+          console.log(user);
+          user.sync.save(__assign(__assign({}, newUser), {
+            name: "Changed name"
+          }));
+          setTimeout(function () {
+            return __awaiter(void 0, void 0, void 0, function () {
+              var newNewUser;
+              return __generator(this, function (_a) {
+                switch (_a.label) {
+                  case 0:
+                    return [4
+                    /*yield*/
+                    , user.sync.fetch(1)];
+
+                  case 1:
+                    newNewUser = _a.sent();
+                    console.log(newNewUser);
+                    return [2
+                    /*return*/
+                    ];
+                }
+              });
+            });
+          }, 3000);
+          return [2
+          /*return*/
+          ];
+      }
+    });
+  });
+};
+
+testing();
 },{"./models/User":"src/models/User.ts"}],"C:/Users/Emir/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -2247,7 +2474,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53983" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52392" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

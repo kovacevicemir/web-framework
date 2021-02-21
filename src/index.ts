@@ -3,8 +3,27 @@ import axios from 'axios'
 
 const baseUrl = "http://localhost:3000"
 
-const user = new User({name:"new record",age:0});
+const user = new User({id:1});
+// user.events.on('test',()=>{console.log('kurac')});
+// user.events.trigger('test');
 
-console.log(user);
+const testing = async () =>{
+ const newUser = await user.sync.fetch(1)
+ user.set(newUser)
+ console.log(user)
 
-User.kurcina();
+ user.sync.save({...newUser,name:"Changed name"})
+
+ setTimeout(async () => {
+     const newNewUser = await user.sync.fetch(1)
+     console.log(newNewUser)
+ }, 3000);
+}
+
+testing();
+
+
+
+
+
+
