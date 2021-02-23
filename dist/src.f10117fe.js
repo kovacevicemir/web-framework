@@ -129,18 +129,18 @@ var Attributes =
 /** @class */
 function () {
   function Attributes(data) {
-    this.data = data;
-  } //get<K extends keyof T>(key: K)
-  //K can only be one of keys of T
-  //T[K] return that object key value
+    var _this = this;
 
+    this.data = data; //get<K extends keyof T>(key: K)
+    //K can only be one of keys of T
+    //T[K] return that object key value
 
-  Attributes.prototype.get = function (key) {
-    return this.data[key];
-  };
+    this.get = function (key) {
+      return _this.data[key];
+    };
+  }
 
   Attributes.prototype.set = function (update) {
-    console.log(update);
     Object.assign(this.data, update);
   };
 
@@ -160,29 +160,31 @@ var Eventing =
 /** @class */
 function () {
   function Eventing() {
-    //any key in events will have type of string.
+    var _this = this; //any key in events will have type of string.
+
+
     this.events = {};
+
+    this.on = function (eventName, callback) {
+      // assign event to handlers or empty [] if events undefined.
+      var handlers = _this.events[eventName] || [];
+      handlers.push(callback);
+      _this.events[eventName] = handlers;
+    };
+
+    this.trigger = function (eventName) {
+      //check if handler/s exist
+      var handlers = _this.events[eventName];
+
+      if (!handlers || handlers.length === 0) {
+        return;
+      }
+
+      handlers.forEach(function (callback) {
+        callback();
+      });
+    };
   }
-
-  Eventing.prototype.on = function (eventName, callback) {
-    // assign event to handlers or empty [] if events undefined.
-    var handlers = this.events[eventName] || [];
-    handlers.push(callback);
-    this.events[eventName] = handlers;
-  };
-
-  Eventing.prototype.trigger = function (eventName) {
-    //check if handler/s exist
-    var handlers = this.events[eventName];
-
-    if (!handlers || handlers.length === 0) {
-      return;
-    }
-
-    handlers.forEach(function (callback) {
-      callback();
-    });
-  };
 
   return Eventing;
 }();
@@ -2250,171 +2252,55 @@ function () {
     this.sync = sync;
   }
 
+  Object.defineProperty(User.prototype, "on", {
+    get: function get() {
+      return this.events.on;
+    },
+    enumerable: false,
+    configurable: true
+  });
+  Object.defineProperty(User.prototype, "trigger", {
+    get: function get() {
+      return this.events.trigger;
+    },
+    enumerable: false,
+    configurable: true
+  });
+  Object.defineProperty(User.prototype, "get", {
+    get: function get() {
+      return this.attributes.get;
+    },
+    enumerable: false,
+    configurable: true
+  });
+
+  User.prototype.set = function (update) {
+    this.attributes.set(update);
+    this.events.trigger("change");
+  };
+
+  User.prototype.fetch = function () {
+    var _this = this;
+
+    var id = this.attributes.get("id");
+
+    if (typeof id !== "number") {
+      throw new Error("cannot fetch without id");
+    }
+
+    this.sync.fetch(id).then(function (res) {
+      _this.set(res);
+    }).catch(function (e) {
+      console.log("could not fetch user with id: " + id + " ");
+    });
+  };
+
   return User;
 }();
 
 exports.User = User;
 },{"./Attributes":"src/models/Attributes.ts","./Eventing":"src/models/Eventing.ts","./Sync":"src/models/Sync.ts"}],"src/index.ts":[function(require,module,exports) {
 "use strict";
-
-var __assign = this && this.__assign || function () {
-  __assign = Object.assign || function (t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-      s = arguments[i];
-
-      for (var p in s) {
-        if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-      }
-    }
-
-    return t;
-  };
-
-  return __assign.apply(this, arguments);
-};
-
-var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
-  function adopt(value) {
-    return value instanceof P ? value : new P(function (resolve) {
-      resolve(value);
-    });
-  }
-
-  return new (P || (P = Promise))(function (resolve, reject) {
-    function fulfilled(value) {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    }
-
-    function rejected(value) {
-      try {
-        step(generator["throw"](value));
-      } catch (e) {
-        reject(e);
-      }
-    }
-
-    function step(result) {
-      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
-    }
-
-    step((generator = generator.apply(thisArg, _arguments || [])).next());
-  });
-};
-
-var __generator = this && this.__generator || function (thisArg, body) {
-  var _ = {
-    label: 0,
-    sent: function sent() {
-      if (t[0] & 1) throw t[1];
-      return t[1];
-    },
-    trys: [],
-    ops: []
-  },
-      f,
-      y,
-      t,
-      g;
-  return g = {
-    next: verb(0),
-    "throw": verb(1),
-    "return": verb(2)
-  }, typeof Symbol === "function" && (g[Symbol.iterator] = function () {
-    return this;
-  }), g;
-
-  function verb(n) {
-    return function (v) {
-      return step([n, v]);
-    };
-  }
-
-  function step(op) {
-    if (f) throw new TypeError("Generator is already executing.");
-
-    while (_) {
-      try {
-        if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-        if (y = 0, t) op = [op[0] & 2, t.value];
-
-        switch (op[0]) {
-          case 0:
-          case 1:
-            t = op;
-            break;
-
-          case 4:
-            _.label++;
-            return {
-              value: op[1],
-              done: false
-            };
-
-          case 5:
-            _.label++;
-            y = op[1];
-            op = [0];
-            continue;
-
-          case 7:
-            op = _.ops.pop();
-
-            _.trys.pop();
-
-            continue;
-
-          default:
-            if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
-              _ = 0;
-              continue;
-            }
-
-            if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
-              _.label = op[1];
-              break;
-            }
-
-            if (op[0] === 6 && _.label < t[1]) {
-              _.label = t[1];
-              t = op;
-              break;
-            }
-
-            if (t && _.label < t[2]) {
-              _.label = t[2];
-
-              _.ops.push(op);
-
-              break;
-            }
-
-            if (t[2]) _.ops.pop();
-
-            _.trys.pop();
-
-            continue;
-        }
-
-        op = body.call(thisArg, _);
-      } catch (e) {
-        op = [6, e];
-        y = 0;
-      } finally {
-        f = t = 0;
-      }
-    }
-
-    if (op[0] & 5) throw op[1];
-    return {
-      value: op[0] ? op[1] : void 0,
-      done: true
-    };
-  }
-};
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -2425,56 +2311,11 @@ var User_1 = require("./models/User");
 var baseUrl = "http://localhost:3000";
 var user = new User_1.User({
   id: 1
-}); // user.events.on('test',()=>{console.log('kurac')});
-// user.events.trigger('test');
-
-var testing = function testing() {
-  return __awaiter(void 0, void 0, void 0, function () {
-    var newUser;
-    return __generator(this, function (_a) {
-      switch (_a.label) {
-        case 0:
-          return [4
-          /*yield*/
-          , user.sync.fetch(1)];
-
-        case 1:
-          newUser = _a.sent();
-          user.attributes.set(newUser);
-          console.log(user);
-          user.sync.save(__assign(__assign({}, newUser), {
-            name: "Emir 4"
-          }));
-          setTimeout(function () {
-            return __awaiter(void 0, void 0, Promise, function () {
-              var newNewUser;
-              return __generator(this, function (_a) {
-                switch (_a.label) {
-                  case 0:
-                    return [4
-                    /*yield*/
-                    , user.sync.fetch(1)];
-
-                  case 1:
-                    newNewUser = _a.sent();
-                    user.attributes.set(newNewUser);
-                    console.log(user);
-                    return [2
-                    /*return*/
-                    ];
-                }
-              });
-            });
-          }, 3000);
-          return [2
-          /*return*/
-          ];
-      }
-    });
-  });
-};
-
-testing();
+});
+user.on("change", function () {
+  console.log(user);
+});
+user.fetch();
 },{"./models/User":"src/models/User.ts"}],"C:/Users/Emir/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';

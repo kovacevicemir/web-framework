@@ -1,4 +1,5 @@
 import axios, { AxiosPromise, AxiosResponse } from "axios";
+import { IUserProps } from "./User";
 
 //base url
 // const baseUrl = "http://localhost:3000";
@@ -10,9 +11,9 @@ interface HasId{
 export class Sync<T extends HasId> {
   constructor(public rootUrl: string) {}
 
-  async fetch(id:number): Promise<AxiosPromise> {
+  async fetch(id:number): Promise<IUserProps> {
     try {
-      const res: AxiosResponse = await axios.get(`${this.rootUrl}/${id}`);
+      const res = await axios.get<IUserProps>(`${this.rootUrl}/${id}`);
       return res.data;
     } catch (error) {
       throw(error)
