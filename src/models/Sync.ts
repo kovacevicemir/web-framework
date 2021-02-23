@@ -20,7 +20,7 @@ export class Sync<T extends HasId> {
     }
   }
 
-  async save(data: T): Promise<AxiosPromise> {
+  async save(data: T): Promise<IUserProps> {
     try {
       if (data.id !== undefined) {
         return axios.put(`${this.rootUrl}/${data.id}`, data);

@@ -47,11 +47,22 @@ export class User {
 
     this.sync
       .fetch(id)
-      .then((res:IUserProps) => {
+      .then((res: IUserProps) => {
         this.set(res);
       })
       .catch((e: any) => {
         console.log(`could not fetch user with id: ${id} `);
+      });
+  }
+
+  save(): void {
+    this.sync
+      .save(this.attributes.getAll())
+      .then((res: IUserProps): void => {
+        this.trigger("save");
+      })
+      .catch(() => {
+        this.trigger("error");
       });
   }
 }
